@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  box-shadow: 0 0 6px #999999;
+  width: var(--page-width);
+  margin: 0 auto;
+
+  &.__has-error {
+    background-color: var(--db_card-background-color);
+    padding: 16px var(--db_card-space-x);
+  }
+}
+
+img {
+  display: block;
+  width: 100%;
+}
+
+.error {
+  margin: 0;
+  display: block;
+  margin-top: 8px;
+  color: var(--db_error-color);
+}

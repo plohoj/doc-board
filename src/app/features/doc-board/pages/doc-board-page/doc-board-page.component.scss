@@ -2,23 +2,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #ccc;
-  max-height: 100%;
+  background-color: var(--db_page-background-color);
+  height: 100%;
   --page-width: calc(var(--page-zoom-ratio) * var(--default-page-width));
 }
 
-.page {
-  box-shadow: 0 0 6px #999999;
-  width: var(--page-width);
-  margin: 0 auto;
+.card {
+  padding: 32px var(--db_card-space-x);
+  background-color: var(--db_card-background-color);
 
-  img {
-    display: block;
-    width: 100%;
+  h3 {
+    margin: 0;
   }
 }
 
+.loader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error {
+  color: var(--db_error-color);
+}
+
 .document-container {
+  flex-grow: 1;
   overflow: auto;
   width: 100%;
   padding-top: 24px;
@@ -28,6 +37,6 @@
   display: inline-flex;
   flex-direction: column;
   gap: calc(16px * var(--page-zoom-ratio));
-  padding: 8px;
+  padding: 0 var(--db_page-space-x) 8px;
   min-width: 100%;
 }

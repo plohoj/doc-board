@@ -1,4 +1,4 @@
-<db-header [title]="document()?.name || ''">
+<db-header [title]="document()?.name || 'Loading...'">
   <db-zoom-panel [(value)]="zoomPercent"/>
 </db-header>
 
@@ -6,20 +6,20 @@
   <div class="document-content">
     @switch (loadingState()) {
       @case ('LADING') {
-        <div class="loader">Loading...</div>
+        <div class="card loader">
+          <mat-spinner [diameter]="24"/>
+          <h3>Loading...</h3>
+        </div>
       }
       @case ('ERROR') {
-        <div class="error">An error occurred while uploading the document, please try again later</div>
+        <div class="card error">
+          <h3>An error occurred while uploading the document, please try again later...</h3>
+        </div>
       }
       @case ('LOADED') {
         @if (document(); as document) {
           @for (page of document.pages; track page.number) {
-            <div class="page">
-              <img
-                [src]="page.imageUrl"
-                alt="Page number {{ page.number }}"
-              >
-            </div>
+            <db-page-image [page]="page"/>
           }
         }
       }

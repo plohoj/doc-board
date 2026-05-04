@@ -17,6 +17,12 @@ html {
       density: 0,
     )
   );
+
+  --db_page-background-color: #ccc;
+  --db_card-background-color: #fff;
+  --db_page-space-x: 16px;
+  --db_card-space-x: 24px;
+  --db_error-color: #ff6633;
 }
 
 body {
