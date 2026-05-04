@@ -1,0 +1,33 @@
+<button
+  matIconButton
+  aria-label="Zoom out"
+  matTooltip="Zoom out"
+  (click)="shiftValue(-zoomStep)"
+>
+  <mat-icon>remove</mat-icon>
+</button>
+
+<mat-form-field
+  class="zoom-input-field"
+  appearance="outline"
+  subscriptSizing="dynamic"
+>
+  <input
+    matInput
+    type="text"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    [(ngModel)]="value"
+    (blur)="applyValue(value())"
+  />
+  <span matTextSuffix>&nbsp;%</span>
+</mat-form-field>
+
+<button
+  matIconButton
+  aria-label="Zoom in"
+  matTooltip="Zoom in"
+  (click)="shiftValue(zoomStep)"
+>
+  <mat-icon>add</mat-icon>
+</button>

@@ -1,0 +1,11 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: flex;
+  gap: 4px;
+}
+
+.zoom-input-field {
+  width: 80px;
+  @include mat.form-field-density(-4);
+}

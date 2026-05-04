@@ -1,21 +1,28 @@
-@switch (loadingState()) {
-  @case ('LADING') {
-    <div class="loader">Loading...</div>
-  }
-  @case ('ERROR') {
-    <div class="error">An error occurred while uploading the document, please try again later</div>
-  }
-  @case ('LOADED') {
-    @if (document(); as document) {
-      <!-- TODO Place name into header -->
-      @for (page of document.pages; track page.number) {
-        <div class="page">
-          <img
-            [src]="page.imageUrl"
-            alt="Page number {{ page.number }}"
-          >
-        </div>
+<db-header [title]="document()?.name || ''">
+  <db-zoom-panel [(value)]="zoomPercent"/>
+</db-header>
+
+<div class="document-container">
+  <div class="document-content">
+    @switch (loadingState()) {
+      @case ('LADING') {
+        <div class="loader">Loading...</div>
+      }
+      @case ('ERROR') {
+        <div class="error">An error occurred while uploading the document, please try again later</div>
+      }
+      @case ('LOADED') {
+        @if (document(); as document) {
+          @for (page of document.pages; track page.number) {
+            <div class="page">
+              <img
+                [src]="page.imageUrl"
+                alt="Page number {{ page.number }}"
+              >
+            </div>
+          }
+        }
       }
     }
-  }
-}
+  </div>
+</div>
