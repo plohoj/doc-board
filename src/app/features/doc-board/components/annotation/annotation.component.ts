@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { BehaviorSubject, delay, distinctUntilChanged, EMPTY, exhaustMap, filter, fromEvent, map, merge, shareReplay, skipWhile, switchMap, take, takeUntil, tap, timer } from 'rxjs';
+import { BehaviorSubject, delay, distinctUntilChanged, EMPTY, exhaustMap, filter, fromEvent, map, merge, of, shareReplay, skipWhile, switchMap, take, takeUntil, tap, timer } from 'rxjs';
 import { IDocumentAnnotation } from '../../interfaces/document-with-annotations.interface';
 import { IHorizontalPosition } from '../../interfaces/horizontal-position.interface';
 import { IPoint } from '../../interfaces/point.interface';
@@ -45,13 +45,9 @@ export class AnnotationComponent implements OnInit {
     x: this.annotation().x / 100,
     y: this.annotation().y / 100,
   }));
-  readonly annotationPositionPx = computed<IHorizontalPosition>(() => {
-    const pageContainerRect = this.pageContainerRef().nativeElement.getBoundingClientRect();
-    return this.#annotationsService.getAnnotationHorizontalPosition(
-      pageContainerRect,
-      this.pointerPositionRatio().x * pageContainerRect.width,
-    )
-  });
+  readonly annotationPositionPx = linkedSignal<IHorizontalPosition>(() =>
+    this.#getAnnotationPositionRelativePointer(this.pointerPositionRatio())
+  );
 
   readonly pointerRef = viewChild.required<ElementRef<HTMLElement>>('pointer');
   readonly textContainerRef = viewChild.required<ElementRef<HTMLElement>>('textContainer');
@@ -71,23 +67,36 @@ export class AnnotationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // TODO Touchscreen
     const isActiveStatus$ = this.#statusSubject.pipe(
       map(status => status === 'ACTIVE'),
       distinctUntilChanged(),
       shareReplay({ bufferSize: 1, refCount: true }),
     );
 
-    // #region Обработка перетаскивания
-    fromEvent<MouseEvent>(this.pointerRef().nativeElement, 'mousedown').pipe(
+    // Обработка перетаскивания
+    merge(
+      fromEvent<MouseEvent>(this.pointerRef().nativeElement, 'mousedown'),
+      fromEvent<TouchEvent>(this.pointerRef().nativeElement, 'touchstart').pipe(
+        map(event => event.touches[0])
+      ),
+    ).pipe(
       exhaustMap((mouseDownEvent) => {
-        let dragHandler$ = fromEvent<MouseEvent>(window, 'mousemove');
+        let dragHandler$ = merge(
+          fromEvent<MouseEvent>(window, 'mousemove'),
+          fromEvent<TouchEvent>(window, 'touchmove', { passive: false }).pipe(
+            map(event => {
+              event.preventDefault();
+              return event.touches[0];
+            }),
+          ),
+        );
         // Защита от случайного движения мышью во время клика
         if (this.#statusSubject.value !== 'ACTIVE') {
           const START_MOVING_DISTANCE_PX = 10;
           dragHandler$ = dragHandler$.pipe(
             skipWhile(mouseMoveEvent =>
-              Math.pow(mouseDownEvent.x - mouseMoveEvent.x, 2) + Math.pow(mouseDownEvent.y - mouseMoveEvent.y, 2)
+              Math.pow(mouseDownEvent.clientX - mouseMoveEvent.clientX, 2)
+                + Math.pow(mouseDownEvent.clientX - mouseMoveEvent.clientY, 2)
                 <= Math.pow(START_MOVING_DISTANCE_PX, 2)
             ),
           );
@@ -99,7 +108,12 @@ export class AnnotationComponent implements OnInit {
             this.#setPositionByEvent(mouseMoveEvent);
           }),
           takeUntil(
-            fromEvent<MouseEvent>(window, 'mouseup').pipe(
+            merge(
+              fromEvent<MouseEvent>(window, 'mouseup'),
+              fromEvent<TouchEvent>(window, 'touchend').pipe(
+                map(event => event.touches[0])
+              ),
+            ).pipe(
               tap(() => {
                 // После окончания перетаскивания нужно отменить событие клика,
                 // иначе при клике вне аннотации будет создана новая аннотация.
@@ -118,9 +132,8 @@ export class AnnotationComponent implements OnInit {
       }),
       takeUntilDestroyed(this.#destroyRef),
     ).subscribe();
-    // #endregion
 
-    // #region Обработка наведения
+    // Обработка наведения
     isActiveStatus$.pipe(
       switchMap(isActiveStatus => isActiveStatus
         ? EMPTY
@@ -135,27 +148,43 @@ export class AnnotationComponent implements OnInit {
       ),
       takeUntilDestroyed(this.#destroyRef),
     ).subscribe();
-    // #endregion
 
-    // #region Обработка внутри аннотации
+    // Обработка внутри аннотации
     fromEvent<MouseEvent>(this.#hostRef.nativeElement, 'click').pipe(
       tap(() => this.#statusSubject.next('ACTIVE')),
       takeUntilDestroyed(this.#destroyRef),
     ).subscribe();
-    // #endregion
 
-    // #region Обработка вне аннотации
+    // Обработка вне аннотации
     isActiveStatus$.pipe(
       switchMap(isActiveStatus => isActiveStatus
-        ? fromEvent<MouseEvent>(window, 'mousedown').pipe(
+        ? merge(
+          fromEvent<MouseEvent>(window, 'mousedown'),
+          fromEvent<TouchEvent>(window, 'touchstart'),
+        ).pipe(
           filter(event => !this.#isAnnotationContainTarget(event.target as Node)),
           tap(() => this.#statusSubject.next('CLOSED')),
-          takeUntilDestroyed(this.#destroyRef),
         )
         : EMPTY,
       ),
+      takeUntilDestroyed(this.#destroyRef),
     ).subscribe();
-    // #endregion
+
+    // Перерасчёт позиции аннотации при scroll и resize событиях и при раскрытии
+    this.#statusSubject.pipe(
+      switchMap(status => {
+        if (status === 'ACTIVE') {
+          return this.#annotationsService.updateAnnotationPosition$;
+        }
+        if (status === 'HOVER') {
+          return of(void 0);
+        }
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this.#destroyRef),
+    ).subscribe(() => this.annotationPositionPx.set(
+      this.#getAnnotationPositionRelativePointer(this.pointerPositionRatio())
+    ));
   }
 
   onRemove(): void {
@@ -173,6 +202,14 @@ export class AnnotationComponent implements OnInit {
     });
   }
 
+  #getAnnotationPositionRelativePointer(pointerPositionRatio: IPoint): IHorizontalPosition {
+    const pageContainerRect = this.pageContainerRef().nativeElement.getBoundingClientRect();
+    return this.#annotationsService.getAnnotationHorizontalPosition(
+      pageContainerRect,
+      pointerPositionRatio.x * pageContainerRect.width
+    );
+  }
+
   #removingWithAnimation(): void {
     merge(
       fromEvent(this.textContainerRef().nativeElement, 'animationend'),
@@ -188,7 +225,7 @@ export class AnnotationComponent implements OnInit {
     return this.#hostRef.nativeElement.contains(target);
   }
 
-  #setPositionByEvent(event: MouseEvent): void {
+  #setPositionByEvent(event: MouseEvent | Touch): void {
     this.annotationChange.emit({
       ...this.annotation(),
       ...this.#annotationsService.getPointerPositionPercentByEvent(

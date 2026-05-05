@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { IHorizontalPosition } from '../interfaces/horizontal-position.interface';
 import { IPoint } from '../interfaces/point.interface';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class AnnotationsService {
 
   #documentContainerElement?: HTMLElement;
+
+  readonly #updateAnnotationPosition = new Subject<void>();
+  /** Нужно обновить позицию из-за scroll или resize события */
+  readonly updateAnnotationPosition$ = this.#updateAnnotationPosition.asObservable();
 
   readonly #MAX_ANNOTATION_SIZE_PX = 550;
   readonly #ANNOTATION_SIZE_RATIO = 0.9;
@@ -44,12 +49,18 @@ export class AnnotationsService {
     return { x: annotationX - documentAndPageDiffX, width: annotationWidth };
   }
 
-  getPointerPositionPercentByEvent(event: MouseEvent, pageContainerRect: DOMRect): IPoint {
+  getPointerPositionPercentByEvent(event: MouseEvent | Touch, pageContainerRect: DOMRect): IPoint {
     const ratioX = (event.clientX - pageContainerRect.left) / pageContainerRect.width;
     const ratioY = (event.clientY - pageContainerRect.top) / pageContainerRect.height;
     return {
       x: Math.min(Math.max(0, ratioX), 1) * 100,
-      y: ratioY * 100,
+      // TODO Можно было бы реализовать делегирование аннотации другой странице,
+      // но это потребует значительно больше времени, поэтому пока что просто ограничим границы
+      y: Math.min(Math.max(0, ratioY), 1) * 100,
     };
+  }
+
+  dispatchUpdateAnnotationPosition(): void {
+    this.#updateAnnotationPosition.next();
   }
 }

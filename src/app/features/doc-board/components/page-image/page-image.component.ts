@@ -37,7 +37,7 @@ export class PageImageComponent {
   }
 
   onAnnotationChange(annotation: IDocumentAnnotation, index: number): void {
-    const modifiedAnnotations = this.page().annotations.slice();
+    const modifiedAnnotations = [...this.page().annotations];
     modifiedAnnotations[index] = annotation;
     this.pageChange.emit({
       ...this.page(),
@@ -50,7 +50,7 @@ export class PageImageComponent {
       ...this.page(),
       annotations: [
         ...this.page().annotations.slice(0, index),
-        ...this.page().annotations.slice(index + 1, this.page().annotations.length),
+        ...this.page().annotations.slice(index + 1),
       ],
     });
   }

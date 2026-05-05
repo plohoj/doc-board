@@ -1,4 +1,4 @@
-import { Component, model } from '@angular/core';
+import { Component, linkedSignal, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
 import { MatFormField, MatSuffix } from '@angular/material/form-field';
@@ -22,24 +22,30 @@ import { MatTooltip } from '@angular/material/tooltip';
 })
 export class ZoomPanelComponent {
 
-  readonly defaultValue = 100;
-  readonly minZoom = 25;
-  readonly maxZoom = 500;
-  readonly zoomStep = 25;
+  #initialValue = 100;
+  readonly MIN_ZOOM = 25;
+  readonly MAX_ZOOM = 500;
+  readonly ZOOM_STEP = 25;
 
-  readonly value = model(this.defaultValue);
+  readonly value = model.required<number>();
+  readonly textValue = linkedSignal(() => `${this.value()}`);
 
   shiftValue(value: number): void {
     const newValue = this.value() + value;
     this.applyValue(newValue);
   }
 
+  onInputFocus(): void {
+    this.#initialValue = this.value();
+  }
+
   applyValue(value: string | number): void {
     const parsedValue: number = parseInt(value as string, 10);
     if (isNaN(parsedValue)) {
-      this.value.set(this.defaultValue);
+      this.value.set(this.#initialValue);
     } else {
-      this.value.set(Math.min(Math.max(this.minZoom, parsedValue), this.maxZoom));
+      this.value.set(Math.min(Math.max(this.MIN_ZOOM, parsedValue), this.MAX_ZOOM));
     }
+    this.textValue.set(`${this.value()}`);
   }
 }

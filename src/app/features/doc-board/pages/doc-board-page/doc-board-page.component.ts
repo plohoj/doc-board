@@ -4,7 +4,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ActivatedRoute } from '@angular/router';
-import { catchError, EMPTY, map, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, fromEvent, map, merge, switchMap, tap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { PageImageComponent } from '../../components/page-image/page-image.component';
 import { ZoomPanelComponent } from '../../components/zoom-panel/zoom-panel.component';
@@ -57,6 +57,7 @@ export class DocBoardPageComponent {
   ngOnInit(): void {
     this.#annotationsService.setDocumentContainer(this.documentContainerRef().nativeElement);
 
+    // Загрузка документа
     this.documentId$.pipe(
       tap(() => this.loadingState.set('LADING')),
       switchMap(documentId => this.#docBoardService.getDocument(documentId).pipe(
@@ -73,6 +74,14 @@ export class DocBoardPageComponent {
       )),
       takeUntilDestroyed(this.#destroyRef),
     ).subscribe();
+
+    // scroll и resize события
+    merge(
+      fromEvent(window, 'resize'),
+      fromEvent(this.documentContainerRef().nativeElement, 'scroll'),
+    ).pipe(
+      takeUntilDestroyed(this.#destroyRef),
+    ).subscribe(() => this.#annotationsService.dispatchUpdateAnnotationPosition());
   }
 
   onPageChange(page: IDocumentPageWithAnnotations, index: number): void {

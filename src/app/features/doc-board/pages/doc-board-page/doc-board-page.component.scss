@@ -7,6 +7,13 @@
   --page-width: calc(var(--page-zoom-ratio) * var(--default-page-width));
 }
 
+.header-panel {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 8px;
+}
+
 .card {
   margin: 16px var(--db_page-space-x);
   padding: 32px var(--db_card-space-x);

@@ -1,14 +1,16 @@
 <db-header [title]="document()?.name || 'Loading...'">
-  @if (loadingState() === 'LOADED') {
-    <button
-      matButton="filled"
-      (click)="onSave()"
-    >
-      <mat-icon>save</mat-icon>
-      Save
-    </button>
-  }
-  <db-zoom-panel [(value)]="zoomPercent"/>
+  <div class="header-panel">
+    @if (loadingState() === 'LOADED') {
+      <button
+        matButton="filled"
+        (click)="onSave()"
+      >
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+    }
+    <db-zoom-panel [(value)]="zoomPercent"/>
+  </div>
 </db-header>
 
 <div

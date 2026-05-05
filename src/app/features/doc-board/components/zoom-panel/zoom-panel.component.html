@@ -2,7 +2,7 @@
   matIconButton
   aria-label="Zoom out"
   matTooltip="Zoom out"
-  (click)="shiftValue(-zoomStep)"
+  (click)="shiftValue(-ZOOM_STEP)"
 >
   <mat-icon>remove</mat-icon>
 </button>
@@ -13,12 +13,15 @@
   subscriptSizing="dynamic"
 >
   <input
+    #input
     matInput
     type="text"
     inputmode="numeric"
     pattern="[0-9]*"
-    [(ngModel)]="value"
-    (blur)="applyValue(value())"
+    [(ngModel)]="textValue"
+    (focus)="onInputFocus()"
+    (blur)="applyValue(textValue())"
+    (keydown.enter)="applyValue(textValue())"
   />
   <span matTextSuffix>&nbsp;%</span>
 </mat-form-field>
@@ -27,7 +30,7 @@
   matIconButton
   aria-label="Zoom in"
   matTooltip="Zoom in"
-  (click)="shiftValue(zoomStep)"
+  (click)="shiftValue(ZOOM_STEP)"
 >
   <mat-icon>add</mat-icon>
 </button>
