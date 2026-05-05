@@ -9,7 +9,7 @@
         matIconButton
         aria-label="Remove annotation"
         matTooltip="Remove annotation"
-        (click)="remove()"
+        (click)="onRemove()"
       >
         <mat-icon>delete_outline</mat-icon>
       </button>
@@ -19,7 +19,7 @@
         matIconButton
         aria-label="Close annotation"
         matTooltip="Close annotation"
-        (click)="close()"
+        (click)="onClose()"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -27,8 +27,9 @@
   }
   <textarea
     #textarea
-    placeholder="Annotation. Example: 'It makes me feel...'"
-    [(ngModel)]="text"
+    placeholder="Add some annotation here..."
+    [ngModel]="annotation().comment"
+    (ngModelChange)="onCommentChange($event)"
   ></textarea>
 </div>
 

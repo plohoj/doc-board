@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { delay, map, Observable, of } from 'rxjs';
-import { IDocument } from '../interfaces/document.interface';
+import { delay, map, Observable, of, timer } from 'rxjs';
+import { IDocumentWithAnnotations } from '../interfaces/document-with-annotations.interface';
+import { IDocumentDto } from '../interfaces/document.dto';
 
 @Injectable()
 export class DocBoardService {
 
-  getDocument(documentId: string): Observable<IDocument> {
-    return of({
+  getDocument(documentId: string): Observable<IDocumentWithAnnotations> {
+    return of<IDocumentDto>({
       "name": "test doc",
       "pages": [
         {
@@ -32,16 +33,24 @@ export class DocBoardService {
       ]
     }).pipe(
       delay(Math.floor(Math.random() * 1000)),
-      map(document => this.#normalizeDocumentLink(document))
+      map(document => this.#normalizeDocument(document))
     );
   }
 
-  #normalizeDocumentLink(document: IDocument): IDocument {
+  saveDocument(document: IDocumentWithAnnotations): Observable<void> {
+    console.log(document);
+    return timer(Math.floor(Math.random() * 1000)).pipe(
+      map(() => {})
+    );
+  };
+
+  #normalizeDocument(document: IDocumentDto): IDocumentWithAnnotations {
     return {
       ...document,
       pages: document.pages.map(page => ({
         ...page,
-        imageUrl: `/images/${page.imageUrl}`
+        imageUrl: `/images/${page.imageUrl}`,
+        annotations: [],
       }))
     };
   }

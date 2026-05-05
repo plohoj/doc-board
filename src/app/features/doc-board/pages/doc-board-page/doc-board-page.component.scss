@@ -8,6 +8,7 @@
 }
 
 .card {
+  margin: 16px var(--db_page-space-x);
   padding: 32px var(--db_card-space-x);
   background-color: var(--db_card-background-color);
 
@@ -30,13 +31,13 @@
   flex-grow: 1;
   overflow: auto;
   width: 100%;
-  padding-top: 24px;
 }
 
 .document-content {
-  display: inline-flex;
-  flex-direction: column;
-  gap: calc(16px * var(--page-zoom-ratio));
-  padding: 0 var(--db_page-space-x) 8px;
+  display: inline-block;
   min-width: 100%;
+}
+
+db-page-image:first-child {
+  padding-top: 16px;
 }

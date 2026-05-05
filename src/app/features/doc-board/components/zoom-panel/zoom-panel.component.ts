@@ -39,7 +39,7 @@ export class ZoomPanelComponent {
     if (isNaN(parsedValue)) {
       this.value.set(this.defaultValue);
     } else {
-      this.value.set(Math.min(Math.max(parsedValue, this.minZoom), this.maxZoom));
+      this.value.set(Math.min(Math.max(this.minZoom, parsedValue), this.maxZoom));
     }
   }
 }

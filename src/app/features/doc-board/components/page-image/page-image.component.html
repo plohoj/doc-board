@@ -1,23 +1,32 @@
-@if (status() === 'LOADED') {
-  <db-annotation
-    [pageContainerRef]="hostRef"
-    [pointerPositionPercent]="{x: 40, y: 30}"
-  />
-}
-
-@if (status() === 'LOADING') {
-  <mat-spinner
-    class="loader"
-    [diameter]="24"
-  />
-}
-
-<img
-  [src]="page().imageUrl"
-  (load)="onImageLoadingEnd()"
-  (error)="onImageLoadingError()"
-  alt="Page number {{ page().number }}"
+<div
+  #pageContainer
+  class="container"
 >
-@if (status() === 'ERROR') {
-  <p class="error">A loading error has occurred.</p>
-}
+  @if (status() === 'LOADED') {
+    @for (annotation of page().annotations; track $index) {
+      <db-annotation
+        [pageContainerRef]="pageContainerRef()"
+        [annotation]="annotation"
+        (annotationChange)="onAnnotationChange($event, $index)"
+        (remove)="onAnnotationRemove($index)"
+      />
+    }
+  }
+
+  @if (status() === 'LOADING') {
+    <mat-spinner
+      class="loader"
+      [diameter]="24"
+    />
+  }
+
+  <img
+    [src]="page().imageUrl"
+    (load)="onImageLoadingEnd()"
+    (error)="onImageLoadingError()"
+    alt="Page number {{ page().number }}"
+  >
+  @if (status() === 'ERROR') {
+    <p class="error">A loading error has occurred.</p>
+  }
+</div>

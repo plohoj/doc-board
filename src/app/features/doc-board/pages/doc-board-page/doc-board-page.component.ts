@@ -1,12 +1,14 @@
 import { Component, computed, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, EMPTY, map, switchMap, tap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { PageImageComponent } from '../../components/page-image/page-image.component';
 import { ZoomPanelComponent } from '../../components/zoom-panel/zoom-panel.component';
-import { IDocument } from '../../interfaces/document.interface';
+import { IDocumentPageWithAnnotations, IDocumentWithAnnotations } from '../../interfaces/document-with-annotations.interface';
 import { AnnotationsService } from '../../services/annotations.service';
 import { DocBoardService } from '../../services/doc-board.service';
 
@@ -20,6 +22,8 @@ import { DocBoardService } from '../../services/doc-board.service';
   },
   imports: [
     MatProgressSpinner,
+    MatButton,
+    MatIcon,
 
     HeaderComponent,
     ZoomPanelComponent,
@@ -38,11 +42,11 @@ export class DocBoardPageComponent {
   // TODO Можно реализовать сервис который загрузит все изображения,
   // для того что бы получить максимальную ширину изображений
   readonly DEFAULT_PAGE_WIDTH_PX = 794;
-  readonly zoomPercent = signal(this.getDefaultZoom(window.innerWidth));
+  readonly zoomPercent = signal(this.#getDefaultZoom(window.innerWidth));
   readonly zoomRatio = computed(() => this.zoomPercent() / 100);
 
   readonly loadingState = signal<'LADING' | 'LOADED' | 'ERROR'>('LADING');
-  readonly document = signal<IDocument | null>(null);
+  readonly document = signal<IDocumentWithAnnotations | null>(null);
 
   readonly documentId$ = inject(ActivatedRoute).params.pipe(
     map(params => params['id'] as string)
@@ -71,7 +75,23 @@ export class DocBoardPageComponent {
     ).subscribe();
   }
 
-  getDefaultZoom(windowWidth: number): number {
+  onPageChange(page: IDocumentPageWithAnnotations, index: number): void {
+    const modifiedPages = [...this.document()!.pages];
+    modifiedPages[index] = page;
+
+    this.document.set({
+      ...this.document()!,
+      pages: modifiedPages,
+    });
+  }
+
+  onSave(): void {
+    this.#docBoardService.saveDocument(this.document()!).pipe(
+      takeUntilDestroyed(this.#destroyRef),
+    ).subscribe();
+  }
+
+  #getDefaultZoom(windowWidth: number): number {
     // TODO На мобильном экране и в некоторых браузерах, полосы прокрутки не отнимают место
     const SCROLL_PANEL_SIZE = 15 // Примерный размер полосы прокрутки
     const PADDINGS = 32;

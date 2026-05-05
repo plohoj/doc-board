@@ -8,6 +8,8 @@ $pointer-size: 36px;
 
   &.__hover,
   &.__active {
+    z-index: 2;
+
     .pointer {
       opacity: 1;
     }
@@ -17,6 +19,10 @@ $pointer-size: 36px;
       display: block;
       animation: fade-in 0.2s;
     }
+  }
+
+  &.__active {
+    z-index: 3;
   }
 }
 

@@ -1,16 +1,24 @@
 :host {
+  display: flex;
+  justify-content: center;
+  padding: calc(16px / 2 * var(--page-zoom-ratio)) var(--db_page-space-x);
+
+  &.__has-error,
+  &.__loading {
+
+    .container {
+      min-height: 56px;
+      background-color: var(--db_card-background-color);
+      padding: 16px var(--db_card-space-x);
+    }
+  }
+}
+
+.container {
   position: relative;
   display: block;
   box-shadow: 0 0 6px #999999;
   width: var(--page-width);
-  margin: 0 auto;
-
-  &.__has-error,
-  &.__loading {
-    min-height: 56px;
-    background-color: var(--db_card-background-color);
-    padding: 16px var(--db_card-space-x);
-  }
 }
 
 img {

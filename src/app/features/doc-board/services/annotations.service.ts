@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IHorizontalPosition } from '../interfaces/horizontal-position.interface';
+import { IPoint } from '../interfaces/point.interface';
 
 @Injectable()
 export class AnnotationsService {
@@ -41,5 +42,14 @@ export class AnnotationsService {
     annotationX = Math.min(containerLeftScroll + this.#documentContainerElement.clientWidth - padding - annotationWidth, annotationX);
 
     return { x: annotationX - documentAndPageDiffX, width: annotationWidth };
+  }
+
+  getPointerPositionPercentByEvent(event: MouseEvent, pageContainerRect: DOMRect): IPoint {
+    const ratioX = (event.clientX - pageContainerRect.left) / pageContainerRect.width;
+    const ratioY = (event.clientY - pageContainerRect.top) / pageContainerRect.height;
+    return {
+      x: Math.min(Math.max(0, ratioX), 1) * 100,
+      y: ratioY * 100,
+    };
   }
 }
