@@ -1,10 +1,13 @@
 :host {
+  position: relative;
   display: block;
   box-shadow: 0 0 6px #999999;
   width: var(--page-width);
   margin: 0 auto;
 
-  &.__has-error {
+  &.__has-error,
+  &.__loading {
+    min-height: 56px;
     background-color: var(--db_card-background-color);
     padding: 16px var(--db_card-space-x);
   }
@@ -13,6 +16,10 @@
 img {
   display: block;
   width: 100%;
+}
+
+.loader {
+  position: absolute;
 }
 
 .error {

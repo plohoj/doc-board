@@ -2,7 +2,10 @@
   <db-zoom-panel [(value)]="zoomPercent"/>
 </db-header>
 
-<div class="document-container">
+<div
+  #documentContainer
+  class="document-container"
+>
   <div class="document-content">
     @switch (loadingState()) {
       @case ('LADING') {

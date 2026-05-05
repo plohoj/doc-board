@@ -1,8 +1,23 @@
+@if (status() === 'LOADED') {
+  <db-annotation
+    [pageContainerRef]="hostRef"
+    [pointerPositionPercent]="{x: 40, y: 30}"
+  />
+}
+
+@if (status() === 'LOADING') {
+  <mat-spinner
+    class="loader"
+    [diameter]="24"
+  />
+}
+
 <img
   [src]="page().imageUrl"
+  (load)="onImageLoadingEnd()"
   (error)="onImageLoadingError()"
   alt="Page number {{ page().number }}"
 >
-@if (hasError()) {
+@if (status() === 'ERROR') {
   <p class="error">A loading error has occurred.</p>
 }

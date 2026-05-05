@@ -1,0 +1,91 @@
+$pointer-size: 36px;
+
+:host {
+  position: absolute;
+  top: calc(var(--pointer-y-ratio) * 100%);
+  width: 100%;
+  z-index: 1;
+
+  &.__hover,
+  &.__active {
+    .pointer {
+      opacity: 1;
+    }
+
+    .text-container {
+      opacity: 1;
+      display: block;
+      animation: fade-in 0.2s;
+    }
+  }
+}
+
+.panel {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  &.__close {
+    color: var(--mat-sys-error);
+  }
+}
+
+.pointer {
+  position: absolute;
+  left: calc(var(--pointer-x-ratio) * 100%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: $pointer-size;
+  height: $pointer-size;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  transform: translate(-#{$pointer-size * 0.5}, -#{$pointer-size * 0.5});
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.text-container {
+  position: absolute;
+  display: none;
+  top: 24px;
+  left: var(--annotation-x);
+  width: var(--annotation-width);
+  border-radius: 8px;
+  padding: 8px;
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary);
+  opacity: 0;
+  transform: translateY(-#{$pointer-size * 0.5});
+  transition: opacity 0.2s;
+  animation: fade-out 0.2s;
+
+  textarea {
+    display: block;
+    height: 100px;
+    width: 100%;
+    resize: vertical;
+  }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; display: block; }
+  to { opacity: 0; display: none; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; display: none; }
+  to { opacity: 1; display: block; }
+}

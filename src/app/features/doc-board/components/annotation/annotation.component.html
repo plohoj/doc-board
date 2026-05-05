@@ -1,0 +1,40 @@
+<div
+  #textContainer
+  class="text-container"
+>
+  @if (status() === 'ACTIVE') {
+    <div class="panel">
+      <button
+        class="icon-button __close"
+        matIconButton
+        aria-label="Remove annotation"
+        matTooltip="Remove annotation"
+        (click)="remove()"
+      >
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+
+      <button
+        class="icon-button"
+        matIconButton
+        aria-label="Close annotation"
+        matTooltip="Close annotation"
+        (click)="close()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+  <textarea
+    #textarea
+    placeholder="Annotation. Example: 'It makes me feel...'"
+    [(ngModel)]="text"
+  ></textarea>
+</div>
+
+<div
+  #pointer
+  class="pointer"
+>
+  <mat-icon [fontIcon]="status() === 'ACTIVE' ? 'open_with' : 'chat'"></mat-icon>
+</div>
