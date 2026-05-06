@@ -1,59 +1,23 @@
 # DocBoard
+Приложение для просмотра документов и добавления аннотаций. Реализация для демонстрации выполнения тестового задания.
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.9.
+Демонстрация приложения: https://plohoj.github.io/doc-board/test-doc
 
-## Development server
+## Плюсы реализации
+1. При изменении размера страницы (ответ Backend), аннотации на последующих страницах не теряют своего местоположения (потому что позиционирование выполняется относительно страницы в процентах, что так же решает проблему при масштабировании).
+1. Автоматический выбор масштаба страниц, при первом открытии приложении (особенно актуально на мобильном экране).
+1. Текст аннотации стремится не выходить за область экрана (актуально при большом масштабе).
 
-To start a local development server, run:
+## Минусы реализации
+1. Нет возможности переносить аннотацию между страницами.
+   * Решение: Алгоритм (в сервисе), который будет искать страницу с которой пересекается аннотация, и перемещение аннотации на страницу с которой она пересекается.
+   Для поиска пересечения можно завести HashMap `{HTMLElement: DocBoardPageComponent }`, в которую компоненты страниц будут сами себя регистрировать.
+1. Интуитивный клик вне области аннотации для закрытия аннотации, создаёт новую аннотацию.
+1. В некоторых местах не учтено то, что ширина страниц может отличаться от `794px`.
+   * Решение: Реализовать сервис который загрузит все изображения и будет хранить ссылки на `HTMLImageElement` в оперативной памяти. Тогда можно будет получить максимальную ширину страниц (изображений).
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Известные проблемы
+1. Прокрутка страницы на сенсорном экране закрывает раскрытую аннотацию.
+   * Решение: Добавление единого сервиса, которое контролирует клики (тапы) и перетаскивания, и принимает решения об отмене и/или делегировании обработки событий.
+1. Удаление аннотации вызывает повторную отрисовку всех аннотаций после этой аннотации.  
+   * Решение: Добавить фейковый `id` (используемый только на Frontend) для аннотаций и использовать его в `trackBy`.

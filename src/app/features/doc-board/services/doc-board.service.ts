@@ -49,7 +49,7 @@ export class DocBoardService {
       ...document,
       pages: document.pages.map(page => ({
         ...page,
-        imageUrl: `/images/${page.imageUrl}`,
+        imageUrl: `images/${page.imageUrl}`,
         annotations: [],
       }))
     };
